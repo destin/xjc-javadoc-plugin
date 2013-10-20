@@ -35,6 +35,16 @@ public class JavadocPluginTest {
 	@Test
 	public void testComplexTypeWithDocumentedProperties() throws Exception {
 		String fileName = "complexTypeWithDocumentedProperties.xsd";
+		assertProcessedSuccessful(fileName);
+	}
+	
+	@Test
+	public void testComplexTypeWithoutProperties() throws Exception {
+		String fileName = "complexTypeWithoutProperties.xsd";
+		assertProcessedSuccessful(fileName);
+	}
+
+	private void assertProcessedSuccessful(String fileName) throws Exception {
 		String xsdPath = new File("src/test/resources", fileName).getAbsolutePath();
 		String outputDir = "target";
 		int result = Driver.run(new String[] {xsdPath , "-Xjavadoc", "-d", outputDir }, System.out, System.out);
