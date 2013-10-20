@@ -10,6 +10,9 @@ Versions
 Plugin usage
 ============
 
+The plugin is not in any public repository yet. Therefore in order to use it one has to retrieve 
+the sources and build the project locally.
+
 XJC
 ---
 
