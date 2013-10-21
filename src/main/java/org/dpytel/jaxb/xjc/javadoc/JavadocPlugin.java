@@ -88,19 +88,9 @@ public class JavadocPlugin extends Plugin {
 			return;
 		}
 		XSTerm term = ((XSParticle)schemaComponent).getTerm();
-		if (term == null) {
-			return;
-		}
-		XSAnnotation xsAnnotation = term.getAnnotation();
-		if (xsAnnotation == null) {
-			return;
-		}
-		BindInfo annotation = (BindInfo) xsAnnotation.getAnnotation();
-		if (annotation == null) {
-			return;
-		}
-		String documentation = annotation.getDocumentation();
-		if (documentation == null || "".equals(documentation)) {
+		
+		String documentation = getDocumentation(term);
+		if (documentation  == null || "".equals(documentation)) {
 			return;
 		}
 		setJavadoc(classOutline, fieldOutline, documentation);
@@ -125,22 +115,27 @@ public class JavadocPlugin extends Plugin {
 
 	private void addJavadoc(EnumOutline enumOutline) {
 		XSComponent schemaComponent = enumOutline.target.getSchemaComponent();
-		if (schemaComponent == null) {
-			return;
-		}
-		XSAnnotation xsAnnotation = schemaComponent.getAnnotation();
-		if (xsAnnotation == null) {
-			return;
-		}
-		BindInfo annotation = (BindInfo) xsAnnotation.getAnnotation();
-		if (annotation == null) {
-			return;
-		}
-		String documentation = annotation.getDocumentation();
+		String documentation = getDocumentation(schemaComponent);
 		if (documentation == null || "".equals(documentation)) {
 			return;
 		}
 		enumOutline.clazz.javadoc().add(0, documentation + "\n\n");
+	}
+
+	private String getDocumentation(XSComponent schemaComponent) {
+		if (schemaComponent == null) {
+			return null;
+		}
+		XSAnnotation xsAnnotation = schemaComponent.getAnnotation();
+		if (xsAnnotation == null) {
+			return null;
+		}
+		BindInfo annotation = (BindInfo) xsAnnotation.getAnnotation();
+		if (annotation == null) {
+			return null;
+		}
+		String documentation = annotation.getDocumentation();
+		return documentation;
 	}
 
 }
