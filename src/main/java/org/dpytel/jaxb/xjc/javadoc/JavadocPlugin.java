@@ -3,6 +3,8 @@
  */
 package org.dpytel.jaxb.xjc.javadoc;
 
+import java.util.Collection;
+
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 
@@ -11,10 +13,10 @@ import com.sun.tools.xjc.Options;
 import com.sun.tools.xjc.Plugin;
 import com.sun.tools.xjc.model.CPropertyInfo;
 import com.sun.tools.xjc.outline.ClassOutline;
+import com.sun.tools.xjc.outline.EnumOutline;
 import com.sun.tools.xjc.outline.FieldOutline;
 import com.sun.tools.xjc.outline.Outline;
 import com.sun.tools.xjc.reader.xmlschema.bindinfo.BindInfo;
-import com.sun.xml.bind.v2.schemagen.xmlschema.Particle;
 import com.sun.xml.xsom.XSAnnotation;
 import com.sun.xml.xsom.XSComponent;
 import com.sun.xml.xsom.XSParticle;
@@ -57,10 +59,15 @@ public class JavadocPlugin extends Plugin {
 	@Override
 	public boolean run(Outline outline, Options opt, ErrorHandler errorHandler)
 			throws SAXException {
+		addJavadocsToClasses(outline);
+		addJavadocsToEnums(outline);
+		return false;
+	}
+
+	private void addJavadocsToClasses(Outline outline) {
 		for (ClassOutline classOutline : outline.getClasses()) {
 			addJavadocs(classOutline);
 		}
-		return false;
 	}
 
 	private void addJavadocs(ClassOutline classOutline) {
@@ -93,7 +100,7 @@ public class JavadocPlugin extends Plugin {
 			return;
 		}
 		String documentation = annotation.getDocumentation();
-		if (documentation == null) {
+		if (documentation == null || "".equals(documentation)) {
 			return;
 		}
 		setJavadoc(classOutline, fieldOutline, documentation);
@@ -107,6 +114,33 @@ public class JavadocPlugin extends Plugin {
 			return;
 		}
 		fieldVar.javadoc().append(documentation.trim());
+	}
+
+	private void addJavadocsToEnums(Outline outline) {
+		Collection<EnumOutline> enums = outline.getEnums();
+		for (EnumOutline enumOutline : enums) {
+			addJavadoc(enumOutline);
+		}
+	}
+
+	private void addJavadoc(EnumOutline enumOutline) {
+		XSComponent schemaComponent = enumOutline.target.getSchemaComponent();
+		if (schemaComponent == null) {
+			return;
+		}
+		XSAnnotation xsAnnotation = schemaComponent.getAnnotation();
+		if (xsAnnotation == null) {
+			return;
+		}
+		BindInfo annotation = (BindInfo) xsAnnotation.getAnnotation();
+		if (annotation == null) {
+			return;
+		}
+		String documentation = annotation.getDocumentation();
+		if (documentation == null || "".equals(documentation)) {
+			return;
+		}
+		enumOutline.clazz.javadoc().add(0, documentation + "\n\n");
 	}
 
 }

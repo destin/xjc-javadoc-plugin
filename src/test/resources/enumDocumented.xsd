@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.example.org/complexTypeWithDocumentedProperties/" targetNamespace="http://www.example.org/complexTypeWithDocumentedProperties/">
+    <simpleType name="enumDocumented">
+    	<annotation>
+    		<documentation>Documentation of enumDocumented</documentation>
+    	</annotation>
+    	<restriction base="string">
+    		<enumeration value="ONE">
+    			<annotation>
+    				<documentation>Documentation of ONE</documentation>
+    			</annotation>
+    		</enumeration>
+    		<enumeration value="TWO"></enumeration>
+    	</restriction>
+    </simpleType>
+    
+    <simpleType name="enumAnnotated">
+    	<annotation>
+    		
+    	</annotation>
+    	<restriction base="string">
+    		<enumeration value="ONE"/>
+    		<enumeration value="TWO"/>
+    	</restriction>
+    </simpleType>
+    
+    <simpleType name="enumNotAnnotated">
+    	<restriction base="string">
+    		<enumeration value="ONE"/>
+    		<enumeration value="TWO"/>
+    	</restriction>
+    </simpleType>
+</schema>
