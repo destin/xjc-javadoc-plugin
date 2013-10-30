@@ -3,6 +3,7 @@
  */
 package org.dpytel.jaxb.xjc.javadoc;
 
+import static org.dpytel.jaxb.xjc.javadoc.JavadocTestHelper.javadocContains;
 import static org.hamcrest.CoreMatchers.any;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
@@ -10,17 +11,36 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.junit.Test;
 
 import com.sun.tools.xjc.BadCommandLineException;
 import com.sun.tools.xjc.Driver;
 
 /**
+ * End-to-end integration test of JavadocPlugin
+ * 
  * @author Dawid Pytel
  * 
  */
 public class JavadocPluginTest {
+
+	private static final String PACKAGE_DIR = "org/example/xjc_javadoc_plugin";
+	private static final String OUTPUT_DIR = "target";
 
 	@Test
 	public void pluginShouldBeLoaded() throws Exception {
@@ -36,7 +56,13 @@ public class JavadocPluginTest {
 	@Test
 	public void testComplexTypeWithDocumentedProperties() throws Exception {
 		String fileName = "complexTypeWithDocumentedProperties.xsd";
+
 		assertProcessedSuccessful(fileName);
+
+		CompilationUnit compilationUnit = parseSourceFile("ComplexTypeWithDocumentedProperties.java");
+		Javadoc javadoc = getJavadocOfField(compilationUnit,
+				"documentedElement");
+		assertThat(javadoc, javadocContains("Some documentation of element"));
 	}
 
 	@Test
@@ -49,15 +75,70 @@ public class JavadocPluginTest {
 	public void testDocumentedEnum() throws Exception {
 		String fileName = "enumDocumented.xsd";
 		assertProcessedSuccessful(fileName);
+
+		CompilationUnit compilationUnit = parseSourceFile("EnumDocumented.java");
+		EnumDeclaration type = getTopLevelEnum(compilationUnit);
+		assertThat(type.getJavadoc(),
+				javadocContains("Documentation of enumDocumented"));
+
 	}
 
 	private void assertProcessedSuccessful(String fileName) throws Exception {
 		String xsdPath = new File("src/test/resources", fileName)
 				.getAbsolutePath();
-		String outputDir = "target";
 		int result = Driver.run(new String[] { xsdPath, "-Xjavadoc", "-d",
-				outputDir }, System.out, System.out);
+				OUTPUT_DIR }, System.out, System.out);
 
 		assertThat(result, is(0));
+	}
+
+	private Javadoc getJavadocOfField(CompilationUnit compilationUnit,
+			String fieldName) {
+		TypeDeclaration type = getTopLevelType(compilationUnit);
+		FieldDeclaration[] fields = type.getFields();
+		FieldDeclaration field = findField(fields, fieldName);
+		Javadoc javadoc = field.getJavadoc();
+		return javadoc;
+	}
+
+	private CompilationUnit parseSourceFile(String fileName)
+			throws IOException, FileNotFoundException {
+		char[] classChars = IOUtils.toCharArray(new FileReader(new File(
+				OUTPUT_DIR + "/" + PACKAGE_DIR, fileName)));
+		ASTParser parser = ASTParser.newParser(AST.JLS3);
+		@SuppressWarnings("rawtypes")
+		Map options = JavaCore.getOptions();
+		JavaCore.setComplianceOptions(JavaCore.VERSION_1_5, options);
+		parser.setCompilerOptions(options);
+		parser.setSource(classChars);
+		CompilationUnit compilationUnit = (CompilationUnit) parser
+				.createAST(null);
+		return compilationUnit;
+	}
+
+	private FieldDeclaration findField(FieldDeclaration[] fields,
+			String fieldName) {
+		for (FieldDeclaration field : fields) {
+			VariableDeclarationFragment fragment = (VariableDeclarationFragment) field
+					.fragments().get(0);
+			String identifier = fragment.getName().getIdentifier();
+			if (identifier.equals(fieldName)) {
+				return field;
+			}
+		}
+		fail("Expected to find field: " + fieldName);
+		return null; // never reached
+	}
+
+	private TypeDeclaration getTopLevelType(CompilationUnit compilationUnit) {
+		return (TypeDeclaration) getTopLevelDeclaration(compilationUnit);
+	}
+
+	private EnumDeclaration getTopLevelEnum(CompilationUnit compilationUnit) {
+		return (EnumDeclaration) getTopLevelDeclaration(compilationUnit);
+	}
+
+	private Object getTopLevelDeclaration(CompilationUnit compilationUnit) {
+		return compilationUnit.types().get(0);
 	}
 }
