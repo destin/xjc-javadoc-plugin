@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.junit.Test;
@@ -60,9 +61,15 @@ public class JavadocPluginTest {
 		assertProcessedSuccessful(fileName);
 
 		CompilationUnit compilationUnit = parseSourceFile("ComplexTypeWithDocumentedProperties.java");
-		Javadoc javadoc = getJavadocOfField(compilationUnit,
+		Javadoc fieldJavadoc = getJavadocOfField(compilationUnit,
 				"documentedElement");
-		assertThat(javadoc, javadocContains("Some documentation of element"));
+		assertThat(fieldJavadoc,
+				javadocContains("Some documentation of element"));
+		
+		Javadoc getterJavadoc = getJavadocOfMethod(compilationUnit,
+				"getDocumentedElement");
+		assertThat(getterJavadoc,
+				javadocContains("Some documentation of element"));
 	}
 
 	@Test
@@ -101,6 +108,14 @@ public class JavadocPluginTest {
 		return javadoc;
 	}
 
+	private Javadoc getJavadocOfMethod(CompilationUnit compilationUnit,
+			String methodName) {
+		TypeDeclaration type = getTopLevelType(compilationUnit);
+		MethodDeclaration[] methods = type.getMethods();
+		MethodDeclaration method = findMethod(methods, methodName);
+		return method.getJavadoc();
+	}
+
 	private CompilationUnit parseSourceFile(String fileName)
 			throws IOException, FileNotFoundException {
 		char[] classChars = IOUtils.toCharArray(new FileReader(new File(
@@ -127,6 +142,17 @@ public class JavadocPluginTest {
 			}
 		}
 		fail("Expected to find field: " + fieldName);
+		return null; // never reached
+	}
+
+	private MethodDeclaration findMethod(MethodDeclaration[] methods,
+			String methodName) {
+		for (MethodDeclaration method : methods) {
+			if (methodName.equals(method.getName().getIdentifier())) {
+				return method;
+			}
+		}
+		fail("Expected to find method: " + methodName);
 		return null; // never reached
 	}
 

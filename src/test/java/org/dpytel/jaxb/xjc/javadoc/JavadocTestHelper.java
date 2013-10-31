@@ -3,7 +3,7 @@
  */
 package org.dpytel.jaxb.xjc.javadoc;
 
-import static org.hamcrest.CoreMatchers.containsString;
+import java.util.List;
 
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.TagElement;
@@ -25,9 +25,14 @@ public class JavadocTestHelper {
 			@Override
 			protected boolean matchesSafely(Javadoc javadoc) {
 				TagElement tagElement = (TagElement) javadoc.tags().get(0);
-				Object firstFragment = tagElement.fragments().get(0);
-				return containsString(comment)
-						.matches(firstFragment.toString());
+				List<?> fragments = tagElement.fragments();
+				for (Object fragment : fragments) {
+					if (fragment != null
+							&& fragment.toString().contains(comment)) {
+						return true;
+					}
+				}
+				return false;
 			}
 
 			public void describeTo(Description description) {
