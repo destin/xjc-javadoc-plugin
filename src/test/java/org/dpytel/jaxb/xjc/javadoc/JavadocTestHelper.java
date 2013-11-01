@@ -36,9 +36,8 @@ public class JavadocTestHelper {
 			}
 
 			public void describeTo(Description description) {
-				description
-						.appendText("Expected that javadoc contains given comment: "
-								+ comment);
+				description.appendText("javadoc contains given comment: "
+						+ comment);
 			}
 		};
 	}

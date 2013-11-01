@@ -36,6 +36,9 @@ public class PropertyJavadoc {
 		if (propertyInfo == null) {
 			return;
 		}
+		if (propertyInfo.javadoc.length() > 0) {
+			return; // JAXB binding customization overwrites xsd:documentation
+		}
 		XSComponent schemaComponent = propertyInfo.getSchemaComponent();
 		if (schemaComponent == null || !(schemaComponent instanceof XSParticle)) {
 			return;

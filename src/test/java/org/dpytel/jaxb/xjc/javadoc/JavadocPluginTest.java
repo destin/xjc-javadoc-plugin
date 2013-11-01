@@ -7,6 +7,7 @@ import static org.dpytel.jaxb.xjc.javadoc.JavadocTestHelper.javadocContains;
 import static org.hamcrest.CoreMatchers.any;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -14,8 +15,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
@@ -27,6 +32,7 @@ import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.sun.tools.xjc.BadCommandLineException;
@@ -42,6 +48,12 @@ public class JavadocPluginTest {
 
 	private static final String PACKAGE_DIR = "org/example/xjc_javadoc_plugin";
 	private static final String OUTPUT_DIR = "target";
+
+	@Before
+	public void deleteAllGeneratedFiles() throws IOException {
+		File generatedFilesDir = new File(OUTPUT_DIR, PACKAGE_DIR);
+		FileUtils.deleteDirectory(generatedFilesDir);
+	}
 
 	@Test
 	public void pluginShouldBeLoaded() throws Exception {
@@ -65,7 +77,7 @@ public class JavadocPluginTest {
 				"documentedElement");
 		assertThat(fieldJavadoc,
 				javadocContains("Some documentation of element"));
-		
+
 		Javadoc getterJavadoc = getJavadocOfMethod(compilationUnit,
 				"getDocumentedElement");
 		assertThat(getterJavadoc,
@@ -87,16 +99,66 @@ public class JavadocPluginTest {
 		EnumDeclaration type = getTopLevelEnum(compilationUnit);
 		assertThat(type.getJavadoc(),
 				javadocContains("Documentation of enumDocumented"));
-
 	}
 
-	private void assertProcessedSuccessful(String fileName) throws Exception {
-		String xsdPath = new File("src/test/resources", fileName)
-				.getAbsolutePath();
-		int result = Driver.run(new String[] { xsdPath, "-Xjavadoc", "-d",
-				OUTPUT_DIR }, System.out, System.out);
+	@Test
+	public void testDocumentationOnPropertiesIsOverwrittenByJAXBBindings()
+			throws Exception {
+		String fileName = "complexTypeWithDocumentedProperties.xsd";
+
+		assertProcessedSuccessful(
+				fileName,
+				"-b",
+				getAbsolutePath("complexTypeWithDocumentedProperties-javadoc-bindings.xjb"));
+
+		CompilationUnit compilationUnit = parseSourceFile("ComplexTypeWithDocumentedProperties.java");
+		Javadoc fieldJavadoc = getJavadocOfField(compilationUnit,
+				"documentedElement");
+		assertThat(fieldJavadoc,
+				not(javadocContains("Some documentation of element")));
+
+		Javadoc getterJavadoc = getJavadocOfMethod(compilationUnit,
+				"getDocumentedElement");
+		assertThat(getterJavadoc,
+				not(javadocContains("Some documentation of element")));
+		assertThat(
+				getterJavadoc,
+				javadocContains("Documentation from JAXB binding customization"));
+	}
+
+	@Test
+	public void testDocumentationOnEnumsIsOverwrittenByJAXBBindings()
+			throws Exception {
+		String fileName = "enumDocumented.xsd";
+		assertProcessedSuccessful(fileName, "-b",
+				getAbsolutePath("enumDocumented-javadoc-bindings.xjb"));
+
+		CompilationUnit compilationUnit = parseSourceFile("EnumDocumented.java");
+		EnumDeclaration type = getTopLevelEnum(compilationUnit);
+		assertThat(type.getJavadoc(),
+				not(javadocContains("Documentation of enumDocumented")));
+		assertThat(
+				type.getJavadoc(),
+				javadocContains("Documentation from JAXB binding customization"));
+	}
+
+	private void assertProcessedSuccessful(String fileName, String... params)
+			throws Exception {
+		String xsdPath = getAbsolutePath(fileName);
+		List<String> args = new ArrayList<String>(Arrays.asList(xsdPath,
+				"-Xjavadoc", "-d", OUTPUT_DIR));
+		args.addAll(Arrays.asList(params));
+		int result = runXjc(args);
 
 		assertThat(result, is(0));
+	}
+
+	private String getAbsolutePath(String fileName) {
+		return new File("src/test/resources", fileName).getAbsolutePath();
+	}
+
+	private int runXjc(List<String> args) throws Exception {
+		return Driver.run(args.toArray(new String[0]), System.out, System.out);
 	}
 
 	private Javadoc getJavadocOfField(CompilationUnit compilationUnit,
@@ -118,8 +180,10 @@ public class JavadocPluginTest {
 
 	private CompilationUnit parseSourceFile(String fileName)
 			throws IOException, FileNotFoundException {
-		char[] classChars = IOUtils.toCharArray(new FileReader(new File(
-				OUTPUT_DIR + "/" + PACKAGE_DIR, fileName)));
+		FileReader inputFile = new FileReader(new File(OUTPUT_DIR + "/"
+				+ PACKAGE_DIR, fileName));
+		char[] classChars = IOUtils.toCharArray(inputFile);
+		inputFile.close();
 		ASTParser parser = ASTParser.newParser(AST.JLS3);
 		@SuppressWarnings("rawtypes")
 		Map options = JavaCore.getOptions();

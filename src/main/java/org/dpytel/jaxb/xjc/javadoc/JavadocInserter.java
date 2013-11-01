@@ -12,6 +12,7 @@ import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.EnumOutline;
 import com.sun.tools.xjc.outline.FieldOutline;
 import com.sun.tools.xjc.outline.Outline;
+import com.sun.tools.xjc.reader.xmlschema.Messages;
 import com.sun.xml.xsom.XSComponent;
 
 /**
@@ -61,6 +62,9 @@ public class JavadocInserter {
 	}
 
 	private void addJavadoc(EnumOutline enumOutline) {
+		if (isCustomBindingApplied(enumOutline)) {
+			return; // JAXB binding customization overwrites xsd:documentation
+		}
 		XSComponent schemaComponent = enumOutline.target.getSchemaComponent();
 		String documentation = XSComponentHelper
 				.getDocumentation(schemaComponent);
@@ -68,6 +72,14 @@ public class JavadocInserter {
 			return;
 		}
 		enumOutline.clazz.javadoc().add(0, documentation + "\n\n");
+	}
+
+	private boolean isCustomBindingApplied(EnumOutline enumOutline) {
+		String defaultComment = Messages.format("ClassSelector.JavadocHeading",
+				enumOutline.target.getTypeName().getLocalPart());
+		// not very clean but the only way of determining whether Javadoc
+		// customization has been applied
+		return !enumOutline.target.javadoc.startsWith(defaultComment);
 	}
 
 }

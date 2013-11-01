@@ -5,7 +5,9 @@ XJC javadoc plugin that adds javadocs based on xsd:documentation element.
 
 Versions
 --------
-0.0.3 Property javadocs are added to getters
+0.0.4 xsd:documentation does not overwrite JAXB custom bindings
+
+0.0.3 Property documentation is added to getter javadocs
 
 0.0.2 Plugin adds javadocs to generated enum types
 
