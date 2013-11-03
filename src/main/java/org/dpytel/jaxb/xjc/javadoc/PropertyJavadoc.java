@@ -62,6 +62,7 @@ public class PropertyJavadoc {
 	private void setJavadoc(String documentation) {
 		setJavadocToField(documentation);
 		setJavadocToGetter(documentation);
+		setSeeTagToSetter();
 	}
 
 	private void setJavadocToField(String documentation) {
@@ -74,7 +75,7 @@ public class PropertyJavadoc {
 	}
 
 	private void setJavadocToGetter(String documentation) {
-		String getterMethod = getGetterMethod(fieldOutline);
+		String getterMethod = getGetterMethod();
 		JMethod getter = MethodHelper.findMethod(classOutline, getterMethod);
 		JDocComment javadoc = getter.javadoc();
 		if (javadoc.size() != 0) {
@@ -84,7 +85,16 @@ public class PropertyJavadoc {
 													// non-tag element
 	}
 
-	private String getGetterMethod(FieldOutline fieldOutline) {
+	private void setSeeTagToSetter() {
+		JMethod setterMethod = MethodHelper.findMethod(classOutline, "set"
+				+ fieldOutline.getPropertyInfo().getName(true));
+		if (setterMethod == null) {
+			return;
+		}
+		setterMethod.javadoc().addXdoclet("see #" + getGetterMethod() + "()");
+	}
+
+	private String getGetterMethod() {
 		JType type = fieldOutline.getRawType();
 		if (options.enableIntrospection) {
 			return ((type.isPrimitive() && type.boxify().getPrimitiveType() == codeModel.BOOLEAN) ? "is"

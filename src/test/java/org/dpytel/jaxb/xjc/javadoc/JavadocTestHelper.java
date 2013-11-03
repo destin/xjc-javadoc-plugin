@@ -41,4 +41,29 @@ public class JavadocTestHelper {
 			}
 		};
 	}
+
+	public static Matcher<Javadoc> containsTag(final String tagName,
+			final String tagValue) {
+		return new TypeSafeMatcher<Javadoc>(Javadoc.class) {
+
+			@Override
+			protected boolean matchesSafely(Javadoc javadoc) {
+				@SuppressWarnings("unchecked")
+				List<TagElement> tags = javadoc.tags();
+				for (TagElement tagElement : tags) {
+					if (tagName.equals(tagElement.getTagName())) {
+						return tagValue.equals(tagElement.fragments().get(0)
+								.toString());
+					}
+				}
+				
+				return false;
+			}
+
+			public void describeTo(Description description) {
+				description.appendText("javadoc contains tag " + tagName + " "
+						+ tagValue);
+			}
+		};
+	}
 }

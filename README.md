@@ -5,6 +5,8 @@ XJC javadoc plugin that adds javadocs based on xsd:documentation element.
 
 Versions
 --------
+0.0.6 @see getter tag is now added to setter methods so that they reference original documentation
+
 0.0.5 Support for attribute documentation
 
 0.0.4 xsd:documentation does not overwrite JAXB custom bindings

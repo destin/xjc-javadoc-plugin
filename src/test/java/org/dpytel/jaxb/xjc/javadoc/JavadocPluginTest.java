@@ -3,6 +3,7 @@
  */
 package org.dpytel.jaxb.xjc.javadoc;
 
+import static org.dpytel.jaxb.xjc.javadoc.JavadocTestHelper.containsTag;
 import static org.dpytel.jaxb.xjc.javadoc.JavadocTestHelper.javadocContains;
 import static org.hamcrest.CoreMatchers.any;
 import static org.hamcrest.CoreMatchers.hasItem;
@@ -82,6 +83,11 @@ public class JavadocPluginTest {
 				"getDocumentedElement");
 		assertThat(getterJavadoc,
 				javadocContains("Some documentation of element"));
+
+		Javadoc setterJavadoc = getJavadocOfMethod(compilationUnit,
+				"setDocumentedElement");
+		assertThat(setterJavadoc,
+				containsTag("@see", "#getDocumentedElement()"));
 	}
 
 	@Test
