@@ -9,9 +9,9 @@ import com.sun.tools.xjc.Options;
 import com.sun.tools.xjc.model.CPropertyInfo;
 import com.sun.tools.xjc.outline.ClassOutline;
 import com.sun.tools.xjc.outline.FieldOutline;
+import com.sun.xml.xsom.XSAttributeUse;
 import com.sun.xml.xsom.XSComponent;
 import com.sun.xml.xsom.XSParticle;
-import com.sun.xml.xsom.XSTerm;
 
 public class PropertyJavadoc {
 
@@ -39,17 +39,24 @@ public class PropertyJavadoc {
 		if (propertyInfo.javadoc.length() > 0) {
 			return; // JAXB binding customization overwrites xsd:documentation
 		}
-		XSComponent schemaComponent = propertyInfo.getSchemaComponent();
-		if (schemaComponent == null || !(schemaComponent instanceof XSParticle)) {
-			return;
-		}
-		XSTerm term = ((XSParticle) schemaComponent).getTerm();
+		XSComponent component = getDocumentedComponent(propertyInfo);
 
-		String documentation = XSComponentHelper.getDocumentation(term);
+		String documentation = XSComponentHelper.getDocumentation(component);
 		if (documentation == null || "".equals(documentation.trim())) {
 			return;
 		}
 		setJavadoc(documentation.trim());
+	}
+
+	private XSComponent getDocumentedComponent(CPropertyInfo propertyInfo) {
+		XSComponent schemaComponent = propertyInfo.getSchemaComponent();
+		if (schemaComponent instanceof XSParticle) {
+			return ((XSParticle) schemaComponent).getTerm();
+		} else if (schemaComponent instanceof XSAttributeUse) {
+			return ((XSAttributeUse) schemaComponent).getDecl();
+		} else {
+			return null;
+		}
 	}
 
 	private void setJavadoc(String documentation) {

@@ -142,6 +142,22 @@ public class JavadocPluginTest {
 				javadocContains("Documentation from JAXB binding customization"));
 	}
 
+	@Test
+	public void testComplexTypeWithDocumentedAttribute() throws Exception {
+		String fileName = "complexTypeWithDocumentedAttribute.xsd";
+
+		assertProcessedSuccessful(fileName);
+
+		CompilationUnit compilationUnit = parseSourceFile("ComplexTypeWithDocumentedAttribute.java");
+		Javadoc fieldJavadoc = getJavadocOfField(compilationUnit,
+				"documentedAttribute");
+		assertThat(fieldJavadoc, javadocContains("Documentation of attribute"));
+
+		Javadoc getterJavadoc = getJavadocOfMethod(compilationUnit,
+				"getDocumentedAttribute");
+		assertThat(getterJavadoc, javadocContains("Documentation of attribute"));
+	}
+
 	private void assertProcessedSuccessful(String fileName, String... params)
 			throws Exception {
 		String xsdPath = getAbsolutePath(fileName);

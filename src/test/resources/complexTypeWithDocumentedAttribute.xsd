@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.example.org/xjc-javadoc-plugin/"
+	targetNamespace="http://www.example.org/xjc-javadoc-plugin/">
+	<complexType name="ComplexTypeWithDocumentedAttribute">
+		<sequence>
+			<element name="someProperty" type="string" />
+		</sequence>
+		<attribute name="documentedAttribute" type="string">
+			<annotation>
+				<documentation>Documentation of attribute</documentation>
+			</annotation>
+		</attribute>
+	</complexType>
+</schema>
