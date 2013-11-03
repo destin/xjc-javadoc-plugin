@@ -78,7 +78,7 @@ public class PropertyJavadoc {
 		JMethod getter = MethodHelper.findMethod(classOutline, getterMethod);
 		JDocComment javadoc = getter.javadoc();
 		if (javadoc.size() != 0) {
-			documentation = "\n\n" + documentation;
+			documentation = "\n<p>\n" + documentation;
 		}
 		javadoc.add(javadoc.size(), documentation); // add comment as last
 													// non-tag element
