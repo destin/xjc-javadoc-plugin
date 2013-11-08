@@ -23,10 +23,72 @@ Plugin usage
 The plugin is not in any public repository yet. Therefore in order to use it one has to retrieve 
 the sources and build the project locally.
 
-XJC
----
+Plugin has to be added to the classpath so that XJC can automatically detect it.
 
-xjc -classpath /path/to/xjc-javadoc-*.jar -Xjavadoc /path/to/xsd
+
+XJC maven plugin
+----------------
+
+	<plugin>
+		<groupId>org.codehaus.mojo</groupId>
+		<artifactId>jaxb2-maven-plugin</artifactId>
+		<version>1.5</version>
+		<executions>
+			<execution>
+				<id>xjc</id>
+				<goals>
+					<goal>xjc</goal>
+				</goals>
+			</execution>
+		</executions>
+		<configuration>
+			<arguments>-Xjavadoc</arguments>
+		</configuration>
+		<dependencies>
+			<dependency>
+				<groupId>org.dpytel.jaxb</groupId>
+				<artifactId>xjc-javadoc</artifactId>
+				<version>0.0.6-SNAPSHOT</version>
+			</dependency>
+		</dependencies>
+	</plugin>
+
+
+JAX-WS maven plugin
+-------------------
+
+    <plugin>
+      <groupId>org.jvnet.jax-ws-commons</groupId>
+      <artifactId>jaxws-maven-plugin</artifactId>
+      <version>2.3</version>
+      <dependencies>
+        <!-- put xjc-javadoc-plugin on the jaxws-maven-plugin's classpath -->
+        <dependency>
+          <groupId>org.dpytel.jaxb</groupId>
+		  <artifactId>xjc-javadoc</artifactId>
+		  <version>${xjc-javadoc-version}</version>
+        </dependency>
+      </dependencies>
+      <configuration>
+        <!-- tell JAXB to actually use xjc-plugins -->
+        <xjcArgs>
+          <xjcArg>-Xjavadoc</xjcArg>
+        </xjcArgs>
+      </configuration>
+      <executions>
+        <execution>
+          <goals>
+            <goal>wsimport</goal>
+          </goals>
+        </execution>
+        <configuration>
+          <wsdlUrls>
+            <wsdlUrl>http://example.com/info?WSDL</wsdlUrl>
+          </wsdlUrls>
+        </configuration>
+      </executions>
+    </plugin>
+
 
 CXF cxf-codegen-plugin
 -------------
