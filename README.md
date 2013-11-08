@@ -48,7 +48,7 @@ XJC maven plugin
 			<dependency>
 				<groupId>org.dpytel.jaxb</groupId>
 				<artifactId>xjc-javadoc</artifactId>
-				<version>0.0.6-SNAPSHOT</version>
+				<version>${xjc-javadoc-version}</version>
 			</dependency>
 		</dependencies>
 	</plugin>
