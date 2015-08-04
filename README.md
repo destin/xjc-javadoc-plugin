@@ -5,7 +5,7 @@ XJC javadoc plugin that adds javadocs based on xsd:documentation element.
 
 ## Plugin has been incorporated into Apache CXF XJC Utils. This version will no longer be maintained.
 
-Plugin jar can be found in maven repository as org.apache.cxf.xjcplugins:cxf-xjc-javadoc
+The new plugin jar can be found in maven repository as org.apache.cxf.xjcplugins:cxf-xjc-javadoc
 http://search.maven.org/#search|ga|1|a%3A%22cxf-xjc-javadoc%22
 
 Sample configuration:
@@ -37,7 +37,7 @@ Sample configuration:
         </dependencies>
     </plugin>
 
-I you would like to contribute to the plugin please contact Apache CXF team. Some instructions could be found on:
+If you would like to contribute to the plugin please contact Apache CXF team. Some instructions can be found on:
 http://cxf.apache.org/getting-involved.html
 
 Obsolete documentation for original plugin
