@@ -3,6 +3,46 @@ xjc-javadoc-plugin
 
 XJC javadoc plugin that adds javadocs based on xsd:documentation element.
 
+## Plugin has been incorporated into Apache CXF XJC Utils. This version will no longer be maintained.
+
+Plugin jar can be found in maven repository as org.apache.cxf.xjcplugins:cxf-xjc-javadoc
+http://search.maven.org/#search|ga|1|a%3A%22cxf-xjc-javadoc%22
+
+Sample configuration:
+
+    <plugin>
+        <groupId>org.jvnet.jaxb2.maven2</groupId>
+        <artifactId>maven-jaxb22-plugin</artifactId>
+        <version>0.12.3</version>
+        <executions>
+            <execution>
+                <id>xjc</id>
+                <goals>
+                    <goal>generate</goal>
+                </goals>
+                <configuration>
+                    <args>
+                        <arg>-Xjavadoc</arg>
+                    </args>
+                </configuration>
+            </execution>
+        </executions>
+
+        <dependencies>
+        <dependency>
+            <groupId>org.apache.cxf.xjcplugins</groupId>
+            <artifactId>cxf-xjc-javadoc</artifactId>
+            <version>3.0.4</version>
+        </dependency>
+        </dependencies>
+    </plugin>
+
+I you would like to contribute to the plugin please contact Apache CXF team. Some instructions could be found on:
+http://cxf.apache.org/getting-involved.html
+
+Obsolete documentation for original plugin
+==========================================
+
 Versions
 --------
 0.0.6 @see getter tag is now added to setter methods so that they reference original documentation
